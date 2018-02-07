@@ -1,0 +1,16 @@
+ERROR: Opening dictionary ./wordlist failed (No such file or directory)
+ERROR: Opening dictionary ./wordlist failed (No such file or directory)
+Opening ./38:10:d5:a0:e9:fe-01.cap
+Reading packets, please wait...[KRead 1128 packets.
+
+   #  BSSID              ESSID                     Encryption
+
+   1  38:10:D5:A0:E9:FE  FRITZ!Box 7490            No data - WEP or WPA
+
+Choosing first network as target.
+
+Opening ./38:10:d5:a0:e9:fe-01.cap
+Reading packets, please wait...Got no data packets from target network!
+
+
+Quitting aircrack-ng...

