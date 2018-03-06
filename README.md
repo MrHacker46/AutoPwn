@@ -4,7 +4,7 @@ A tool for attacking every network around you
  # Usage
  After installing all dependencies, run:
  
- ```python3 AuoPwn.py```
+ ```python3 AutoPwn.py```
  
  to see the available options
  
